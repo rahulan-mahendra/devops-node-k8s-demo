@@ -1,0 +1,20 @@
+{
+  "name": "devops-node-k8s-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
