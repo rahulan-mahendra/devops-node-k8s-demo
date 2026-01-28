@@ -1,0 +1,62 @@
+name: CI
+
+on: 
+    push:
+        branches:
+          - main
+          - 'feature/**'
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
+      
+
+jobs:
+    unit-testing:
+        name: Unit Testing
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v4
+
+          - name: Set up Node.js
+            uses: actions/setup-node@v4
+            with:
+                node-version: '20'
+
+          - name: Install Dependencies
+            run: npm ci
+
+          - name: Run Unit Test
+            run: npm test
+
+    build:
+        name: Build Docker Image
+        needs: [unit-testing]
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v4
+         
+          - name: Build Docker image
+            run: docker build -t devops-node-k8s-demo:${{ github.sha }} .
+
+          - name: Docker Image Testing
+            env:
+                APP_NAME: devops-node-k8s-demo
+                APP_ENV: dev
+                APP_VERSION: 0.0.0
+            run: |
+                docker images
+                docker run -d -p 3000:3000 \
+                -e APP_NAME=$APP_NAME \
+                -e APP_ENV=$APP_ENV \
+                -e APP_VERSION=$APP_VERSION \
+                --name node-app \
+                devops-node-k8s-demo:${{ github.sha }}
+
+                sleep 5
+                curl -f http://localhost:3000/health
+                docker rm -f node-app
+
+            
