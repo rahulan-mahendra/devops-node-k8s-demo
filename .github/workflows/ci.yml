@@ -77,3 +77,31 @@ jobs:
                 tags: |
                     ghcr.io/${{ github.repository_owner }}/devops-node-k8s-demo:${{ github.sha }}
                     ghcr.io/${{ github.repository_owner }}/devops-node-k8s-demo:latest
+
+    deploy:
+      name: Deploy to Kubernetes
+      needs: [build]
+      runs-on: ubuntu-latest
+
+      if: github.event_name == 'workflow_dispatch'
+
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v4
+
+        - name: Setup kubectl
+          uses: azure/setup-kubectl@v3
+          with:
+            version: 'latest'
+
+        - name: Set Kubeconfig file
+          uses: azure/k8s-set-context@v3
+          with:
+            method: kubeconfig
+            kubeconfig: ${{ secrets.KUBE_CONFIG }}
+            
+        - name: Fetch Kubernetes Cluster Details
+          run: |
+            kubectl version --short
+            echo ---------------------------------------------------
+            kubectl get nodes
