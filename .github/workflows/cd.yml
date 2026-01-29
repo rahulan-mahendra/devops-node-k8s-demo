@@ -11,11 +11,10 @@ jobs:
         - name: Checkout repo
           uses: actions/checkout@v4
 
-        - name: Setup kubectl
-          uses: azure/setup-kubectl@v3
-          with:
-            version: 'latest'
-            
+        - name: Bootstrap runner dependencies
+          run: |
+            bash /scripts/bootstrap-runner.sh
+                    
         - name: Fetch Kubernetes Cluster Details
           run: |
             kubectl version --client
