@@ -29,7 +29,7 @@ fi
 # ---- Kubernetes cluster ----
 CLUSTER_NAME="devops-demo"
 if ! kind get clusters | grep -q "$CLUSTER_NAME"; then
-  echo "🚀 Creating Kind cluster: $CLUSTER_NAME"
+  echo "Creating Kind cluster: $CLUSTER_NAME"
   kind create cluster --name $CLUSTER_NAME
 else
   echo "Kind cluster already exists"

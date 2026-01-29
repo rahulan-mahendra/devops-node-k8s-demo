@@ -13,7 +13,7 @@ jobs:
 
         - name: Bootstrap runner dependencies
           run: |
-            bash /scripts/bootstrap-runner.sh
+            bash ./scripts/bootstrap-runner.sh
                     
         - name: Fetch Kubernetes Cluster Details
           run: |
