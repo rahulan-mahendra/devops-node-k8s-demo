@@ -1,0 +1,29 @@
+name: CD
+
+on: 
+    workflow_dispatch:      
+
+jobs:
+    deploy:
+      name: Deploy to Kubernetes
+      runs-on: self-hosted
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v4
+
+        - name: Setup kubectl
+          uses: azure/setup-kubectl@v3
+          with:
+            version: 'latest'
+            
+        - name: Fetch Kubernetes Cluster Details
+          run: |
+            kubectl version --client
+            kubectl get nodes
+
+        - name: Deploy manifests
+          run: |
+            kubectl apply -f kubernetes/configmap.yaml
+            kubectl apply -f kubernetes/deployment.yaml
+            kubectl apply -f kubernetes/service.yaml
+            kubectl rollout status deployment/devops-demo
