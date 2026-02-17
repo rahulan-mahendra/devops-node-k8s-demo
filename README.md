@@ -1,56 +1,66 @@
 # DevOps Node.js Kubernetes CI/CD Demo
 
-This project demonstrates an **end-to-end DevOps workflow** using a simple Node.js application, Docker, GitHub Actions (CI), GitHub Container Registry (GHCR), Kubernetes (Kind), and a **self-hosted GitHub Actions runner** for Continuous Deployment — all running locally with **zero cloud cost**.
+This project demonstrates an end-to-end DevOps workflow using a simple Node.js application, Docker containerization, GitHub Actions for Continuous Integration, GitHub Container Registry for image storage, and Kubernetes (Kind) for orchestration. Continuous Deployment is implemented using a self-hosted GitHub Actions runner, with the entire setup running locally at zero cloud cost.
 
-The goal of this project is to be **reproducible** and easy to explain.
-
----
-
-## 🚀 What This Project Covers
-
-### ✅ Application
-
-* Simple Node.js app
-* Exposes health, info and crash endpoints
-* Environment-driven configuration
-
-### ✅ Containerization
-
-* Multi-stage Docker build
-* Lightweight production image
-* Runtime configuration via environment variables
-
-### ✅ CI (GitHub Actions)
-
-* Triggered on push, PR, or manual dispatch
-* Unit tests
-* Docker image build
-* Container health validation
-* Push image to **GitHub Container Registry (GHCR)**
-
-### ✅ CD (Kubernetes)
-
-* Kubernetes manifests committed to GitHub
-* Deployment to a **local Kind cluster**
-* Automated deployment using a **self-hosted GitHub Actions runner**
+The objective of this project is to be reproducible, portable, and easy to explain, making it suitable for learning, demonstrations, and portfolio presentation.
 
 ---
 
-## 🧱 Tech Stack
+## Project Overview
 
-| Layer         | Technology                |
-| ------------- | ------------------------- |
-| App           | Node.js                   |
-| Container     | Docker                    |
-| CI            | GitHub Actions            |
-| Registry      | GHCR (ghcr.io)            |
-| Orchestration | Kubernetes (Kind)         |
-| CD Runner     | GitHub Self-Hosted Runner |
-| OS            | Ubuntu (VirtualBox VM)    |
+This repository showcases the complete lifecycle of a containerized application:
+
+- Application development
+- Container build and optimization
+- Automated testing and image validation
+- Image publishing to a registry
+- Kubernetes deployment
+- Continuous Deployment using a self-hosted runner
+- Deterministic environment verification
 
 ---
 
-## 📂 Repository Structure
+## Features
+
+### Application
+- Lightweight Node.js REST application
+- Health, information, and crash simulation endpoints
+- Environment-based configuration
+
+### Containerization
+- Multi-stage Docker build
+- Minimal production image
+- Runtime configuration via environment variables
+
+### Continuous Integration
+- Triggered on push, pull request, or manual dispatch
+- Dependency installation and unit tests
+- Docker image build and runtime validation
+- Automatic image push to GitHub Container Registry
+
+### Continuous Deployment
+- Kubernetes manifests stored in version control
+- Deployment to a local Kind cluster
+- Self-hosted GitHub Actions runner for cluster access
+- Automated and repeatable deployments
+
+---
+
+## Technology Stack
+
+| Layer          | Technology                |
+|---------------|--------------------------|
+| Application   | Node.js                  |
+| Container     | Docker                   |
+| CI/CD         | GitHub Actions           |
+| Registry      | GitHub Container Registry|
+| Orchestration | Kubernetes (Kind)        |
+| Runner        | GitHub Self-Hosted Runner|
+| OS            | Ubuntu (VirtualBox VM)   |
+
+---
+
+## Repository Structure
 
 ```
 .
@@ -75,49 +85,47 @@ The goal of this project is to be **reproducible** and easy to explain.
 
 ---
 
-## 🐳 Docker Image
+## Docker Image
 
-The application is packaged as a Docker image and published to GHCR.
+The application is packaged into a Docker image and published to GitHub Container Registry.
 
 ### Runtime Environment Variables
 
-* `APP_NAME`
-* `APP_ENV`
-* `APP_VERSION`
+| Variable     | Description              |
+|-------------|--------------------------|
+| APP_NAME    | Application name         |
+| APP_ENV     | Environment (dev/prod)   |
+| APP_VERSION | Application version      |
 
 ---
 
-## ⚙️ CI Pipeline (GitHub Actions)
+## Continuous Integration Pipeline
 
 ### CI Flow
-
-1. Checkout code
+1. Checkout source code
 2. Install dependencies
-3. Run unit tests
+3. Execute unit tests
 4. Build Docker image
 5. Run container health check (`/health`)
-6. Push image to GHCR
+6. Push image to container registry
 
-### Why Image Testing in CI?
-
-* Verifies the container actually starts
-* Catches runtime issues early
-* Mimics real production behavior
+### Purpose of Image Testing
+- Ensures the container starts correctly
+- Detects runtime configuration issues
+- Simulates production-like execution
 
 ---
 
-## ☸️ Kubernetes Deployment
+## Kubernetes Deployment
 
 ### Cluster
+- Local Kubernetes cluster using Kind
+- Runs inside Docker on an Ubuntu virtual machine
 
-* **Kind (Kubernetes in Docker)**
-* Runs locally on an Ubuntu VM
-
-### Resources
-
-* **ConfigMap** – application configuration
-* **Deployment** – Node.js app pods
-* **Service (NodePort)** – external access
+### Kubernetes Resources
+- **ConfigMap** – Stores application configuration
+- **Deployment** – Manages application pods
+- **Service (NodePort)** – Exposes the application
 
 ### Apply Order
 
@@ -126,12 +134,9 @@ kubectl apply -f kubernetes/configmap.yaml
 kubectl apply -f kubernetes/deployment.yaml
 kubectl apply -f kubernetes/service.yaml
 ```
-
-> ConfigMap is applied first to ensure it exists before the Deployment starts.
-
 ---
 
-## 🔁 Continuous Deployment (CD)
+## Continuous Deployment (CD)
 
 ### Approach
 
@@ -151,28 +156,20 @@ kubectl apply -f kubernetes/service.yaml
 
 ---
 
-## 🧪 Self-Hosted Runner Bootstrap
+## Self-Hosted Runner Bootstrap
 
 To ensure reproducibility, the CD workflow runs a **bootstrap script** before deploying Kubernetes manifests. This script:
 
 * Verifies Docker, kubectl, and Kind are installed
-* Installs missing tools if necessary
-* Ensures the Kind cluster exists
+* Displays warnings if dependencies are missing
+* Ensures the Kind cluster exists (creates it if absent)
 * Sets the correct kube context
 
-Example workflow step:
-
-```yaml
-- name: Bootstrap runner dependencies
-  run: |
-    bash ./scripts/bootstrap-runner.sh
-```
-
-This makes the CD pipeline **deterministic** and **re-runnable** even after VM reboots.
+This allows the CD pipeline to be safe to re-run after VM restarts without reinstalling tools automatically.
 
 ---
 
-## 🌐 Accessing the Application (Kind-Compatible)
+## Accessing the Application (Kind-Compatible)
 
 Kind runs inside Docker, so NodePort does **not always map directly to localhost**. Use **port-forwarding** to access services from your host.
 
@@ -189,7 +186,7 @@ This works reliably on any host running the Kind cluster.
 
 ---
 
-## 🧪 Application Endpoints
+## Application Endpoints
 
 | Endpoint  | Description                 |
 | --------- | --------------------------- |
@@ -199,10 +196,8 @@ This works reliably on any host running the Kind cluster.
 
 ---
 
-## 🔮 Possible Next Improvements
+## Possible Next Improvements
 
 * Helm chart
 * Ingress controller
 * GitOps with ArgoCD or Flux
-* Prometheus + Grafana
-* Canary or blue-green deployments
